@@ -1,8 +1,11 @@
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
-public class BeautifulSubList {
+public class Sort {
     public static void main(String[] args) {
         Sorter sorter = new Sorter();
         boolean flag = true;
@@ -10,7 +13,7 @@ public class BeautifulSubList {
             int[] list = arrayGenerator(10);
             int[] test = Arrays.copyOf(list, list.length);
             Arrays.sort(test);
-            list = sorter.mergeSort(list);
+            sorter.bucketSort(list);
             if (!Arrays.equals(list, test)) {
                 flag = false;
             }
@@ -153,11 +156,89 @@ class Sorter {
         int index = pivot + 1;
         for (int i = index; i <= right; i++) {
             if (arr[i] < arr[pivot]) {
-                int temp = arr[i];
-                arr[i] = arr[pivot];
-                arr[pivot] = temp;
+                swap(arr, i, index);
+
+                index++;
             }
         }
+        swap(arr, index - 1, pivot);
         return index - 1;
+    }
+
+    void buildHeap(int[] arr) {
+        for (int i = arr.length / 2; i >= 0; i--) {
+            heapify(arr, i, arr.length);
+        }
+    }
+
+    void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    /**
+     * 堆调整
+     * 
+     * @param arr
+     * @param index
+     */
+    void heapify(int[] arr, int index, int end) {
+        int left = 2 * index + 1;
+        int right = 2 * index + 2;
+        int largest = index;
+        if (left < end && arr[left] > arr[largest]) {
+            largest = left;
+        }
+
+        if (right < end && arr[right] > arr[largest]) {
+            largest = right;
+        }
+
+        if (largest != index) {
+            swap(arr, index, largest);
+            heapify(arr, largest, end);
+        }
+    }
+
+    void heapSort(int[] arr) {
+        buildHeap(arr);
+        for (int i = arr.length - 1; i >= 0; i--) {
+            swap(arr, i, 0);
+            heapify(arr, 0, i);
+        }
+    }
+
+    void countingSort(int[] arr, int maxValue) {
+        int[] res = new int[maxValue + 1];
+        for (int i = 0; i < arr.length; i++) {
+            res[arr[i]]++;
+        }
+        int index = 0;
+        for (int i = 0; i < res.length; i++) {
+            if (res[i] > 0) {
+                arr[index++] = i;
+            }
+        }
+    }
+
+    void bucketSort(int[] arr) {
+        int bucketSize = 10;
+        ArrayList[] bucket = new ArrayList[bucketSize];
+        for (int i = 0; i < bucket.length; i++) {
+            bucket[i] = new ArrayList<>();
+        }
+        for (int i = 0; i < arr.length; i++) {
+            bucket[(arr[i] - 1) / 10].add(arr[i]);
+        }
+        for (int i = 0; i < bucket.length; i++) {
+            Collections.sort(bucket[i]);
+        }
+        int index = 0;
+        for (int i = 0; i < bucket.length; i++) {
+            for (int j = 0; j < bucket[i].size(); j++) {
+                arr[index++] = (int) bucket[i].get(j);
+            }
+        }
     }
 }
